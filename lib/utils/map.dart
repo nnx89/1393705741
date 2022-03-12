@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -26,7 +25,7 @@ class MapManager {
 
   static Widget createMap(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
-    return Container(
+    return SizedBox(
       height: screenSize.height,
       width: screenSize.width,
       child: BMFMapWidget(
