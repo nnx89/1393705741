@@ -21,7 +21,7 @@ class MapManager {
       zoomLevel: 12,
       mapPadding: BMFEdgeInsets(left: 30, top: 0, right: 30, bottom: 0));
 
-  static BMFMapController mapContoller;
+  static BMFMapController? mapContoller;
 
   static Widget createMap(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
