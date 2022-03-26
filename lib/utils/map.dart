@@ -23,14 +23,30 @@ class MapManager {
 
   static BMFMapController? mapContoller;
 
+  static registerOnDrawMapFrameCallback(BMFMapController controller) {
+    controller.setMapOnDrawMapFrameCallback(
+      callback: (BMFMapStatus mapStatus) {
+        // ignore: avoid_print
+        print('===== mapStatus =====');
+        print(mapStatus);
+        print(mapStatus.coordinateBounds?.northeast.latitude);
+        print(mapStatus.coordinateBounds?.southwest.latitude);
+        print(
+            '${mapStatus.targetGeoPt?.longitude}, ${mapStatus.targetGeoPt?.latitude}');
+      },
+    );
+  }
+
   static Widget createMap(BuildContext context) {
+    print('===== testPrint =====');
     Size screenSize = MediaQuery.of(context).size;
     return SizedBox(
       height: screenSize.height,
       width: screenSize.width,
       child: BMFMapWidget(
         onBMFMapCreated: (controller) {
-          // onBMFMapCreated(controller);
+          mapContoller = controller;
+          registerOnDrawMapFrameCallback(controller);
         },
         mapOptions: mapOptions,
       ),
