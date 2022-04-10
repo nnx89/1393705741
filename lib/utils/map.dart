@@ -79,7 +79,10 @@ class _MapWidgetState extends State<MapWidget> {
       BMFMapWidget(
         onBMFMapCreated: (controller) {
           controller.setMapOnDrawMapFrameCallback(callback: onDrawMapFrame);
-          controller.addDot(BMFDot(center: BMFCoordinate(23.494269954413255, 111.2856977305498), radius: 10, color: Colors.amber));
+          controller.addDot(BMFDot(
+              center: BMFCoordinate(23.494269954413255, 111.2856977305498),
+              radius: 10,
+              color: Colors.amber));
         },
         mapOptions: widget.mapOptions,
       ),
