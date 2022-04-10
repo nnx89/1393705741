@@ -1,8 +1,11 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_baidu_mapapi_base/flutter_baidu_mapapi_base.dart';
 import 'package:flutter_baidu_mapapi_map/flutter_baidu_mapapi_map.dart';
+
+import 'map_util.dart';
 
 void initMapSDK() {
   if (Platform.isIOS) {
@@ -27,80 +30,79 @@ class MapWidget extends StatefulWidget {
 }
 
 class _MapWidgetState extends State<MapWidget> {
-  List<Widget> visibleOverlays = [];
   late Size parentSize;
 
-  void onDrawMapFrame(BMFMapStatus mapStatus) {
-    assert(mapStatus.coordinateBounds != null);
+  List<Widget> visibleOverlays = [];
 
+  bool _isInRange(BMFCoordinate pos, BMFCoordinateBounds bound) {
+    // return bound.southwest.latitude <= pos.latitude &&
+    //     pos.latitude <= bound.northeast.latitude &&
+    //     bound.southwest.longitude <= pos.longitude &&
+    //     pos.longitude <= bound.northeast.longitude;
+    return true;
+  }
+
+  void onDrawMapFrame(BMFMapStatus mapStatus) {
     if (widget.overlays == null) {
       return;
     }
+    assert(mapStatus.coordinateBounds != null);
+
+    print("Rotation: ${mapStatus.fRotation}");
+    print(
+        "Northeast: ${mapStatus.coordinateBounds!.northeast.latitude}    ${mapStatus.coordinateBounds!.northeast.longitude}");
+    print(
+        "Southwest: ${mapStatus.coordinateBounds!.southwest.latitude}    ${mapStatus.coordinateBounds!.southwest.longitude}");
     var visibleOverlays = <Widget>[];
     for (MapOverlay overlay in widget.overlays!) {
-      if (mapStatus.coordinateBounds!.southwest.latitude <=
-              overlay.coordinate.latitude &&
-          overlay.coordinate.latitude <=
-              mapStatus.coordinateBounds!.northeast.latitude &&
-          mapStatus.coordinateBounds!.southwest.longitude <=
-              overlay.coordinate.longitude &&
-          overlay.coordinate.longitude <=
-              mapStatus.coordinateBounds!.northeast.longitude) {
-        double latitudeHeight = mapStatus.coordinateBounds!.northeast.latitude -
-            mapStatus.coordinateBounds!.southwest.latitude;
-        double longitudeWidth =
-            mapStatus.coordinateBounds!.northeast.longitude -
-                mapStatus.coordinateBounds!.southwest.longitude;
-        double xFactor = parentSize.width / longitudeWidth;
-        double yFactor = parentSize.height / latitudeHeight;
-
+      if (_isInRange(overlay.coordinate, mapStatus.coordinateBounds!)) {
+        var point = convertGeoCoordToScreenCoord(
+            overlay.coordinate, mapStatus.coordinateBounds!, parentSize);
+        print("Overlay Pos: ${point.x}  ${point.y}");
         visibleOverlays.add(Positioned(
           child: overlay,
-          left: (overlay.coordinate.longitude -
-                  mapStatus.coordinateBounds!.southwest.longitude) *
-              xFactor,
-          bottom: (overlay.coordinate.latitude -
-                  mapStatus.coordinateBounds!.southwest.latitude) *
-              yFactor,
+          left: point.x.toDouble(),
+          bottom: point.y.toDouble(),
         ));
       }
     }
     setState(() {
       this.visibleOverlays = visibleOverlays;
     });
-    print(
-        "${mapStatus.coordinateBounds?.northeast.latitude}    ${mapStatus.coordinateBounds?.northeast.longitude}");
+
+    print("==============");
   }
 
   @override
   Widget build(BuildContext context) {
     parentSize = MediaQuery.of(context).size;
-    var children = [
-      BMFMapWidget(
-        onBMFMapCreated: (controller) {
-          controller.setMapOnDrawMapFrameCallback(callback: onDrawMapFrame);
-          controller.addDot(BMFDot(
-              center: BMFCoordinate(23.494269954413255, 111.2856977305498),
-              radius: 10,
-              color: Colors.amber));
-        },
-        mapOptions: widget.mapOptions,
-      ),
-      Positioned(
-        child: Container(
-          height: 50,
-          width: 50,
-          color: Colors.green,
-        ),
-        right: 50,
-        bottom: 50,
-      )
-    ];
-
-    children.addAll(visibleOverlays);
 
     return Stack(
-      children: children,
+      children: [
+        BMFMapWidget(
+          onBMFMapCreated: (controller) {
+            controller.setMapOnDrawMapFrameCallback(callback: onDrawMapFrame);
+            controller.addDot(BMFDot(
+                center: BMFCoordinate(23.494269954413255, 111.2856977305498),
+                radius: 10,
+                color: Colors.amber));
+            controller.
+          },
+          mapOptions: widget.mapOptions,
+        ),
+        Positioned(
+          child: Container(
+            height: 50,
+            width: 50,
+            color: Colors.green,
+          ),
+          right: 50,
+          bottom: 50,
+        ),
+        Stack(
+          children: visibleOverlays,
+        )
+      ],
     );
   }
 }
