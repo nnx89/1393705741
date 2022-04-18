@@ -1,115 +1,229 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
+main() {
+  runApp(MaterialApp(
+    home: RootApp(),
+  ));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  // This widget is the root of your application.
+class RootApp extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+  State<StatefulWidget> createState() {
+    return _RootAppState();
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+class _RootAppState extends State {
+  List<String> list = [
+    "西交利物浦大学",
+    "ics专业",
+    "男生",
+    "女生",
+    "上海人 ",
+    "苏州人",
+    "留学生",
+    "180 ",
+    "20岁"
+  ];
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text("who's here"),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text("选择你的tag： $_currentIndex"),
+          Container(
+            height: 90,
+            child: CustomTabWidget(
+              tabTitleList: list,
+              select: _currentIndex,
+              onTap: (int index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
+          )
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+}
+
+///代码清单
+class CustomTabWidget extends StatefulWidget {
+  final List<String> tabTitleList;
+  final int select;
+  final Function(int index) onTap;
+
+  const CustomTabWidget(
+      {Key? key,
+      required this.tabTitleList,
+      this.select = 0,
+      required this.onTap})
+      : super(key: key);
+
+  @override
+  _CustomTabWidgetState createState() => _CustomTabWidgetState();
+}
+
+class _CustomTabWidgetState extends State<CustomTabWidget> {
+  List<TabModel> _list = [];
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    initDataFunction();
+  }
+
+  @override
+  void didUpdateWidget(covariant CustomTabWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _currentIndex = widget.select;
+    initDataFunction();
+  }
+
+  initDataFunction() {
+    _list = [];
+    for (int i = 0; i < widget.tabTitleList.length; i++) {
+      String title = widget.tabTitleList[i];
+      _list.add(TabModel(title: title, select: _currentIndex == i, id: i));
+    }
+    widget.tabTitleList.forEach((element) {});
+  }
+
+  ScrollController _scrollController = new ScrollController();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      controller: _scrollController,
+      scrollDirection: Axis.horizontal,
+      itemCount: _list.length,
+      itemBuilder: (BuildContext context, int index) {
+        TabModel _tabModel = _list[index];
+
+        Color bgColor = Colors.grey[200]!;
+        Color borderColor = Colors.grey[200]!;
+        Color textColor = Colors.black;
+        if (_tabModel.select) {
+          bgColor = Colors.white;
+          borderColor = Colors.blueAccent;
+          textColor = Colors.blueAccent;
+        }
+
+        return Container(
+          margin: EdgeInsets.only(left: 10, right: 10),
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  if (_tabModel.select) {
+                    return;
+                  }
+                  int selectIndex = 0;
+                  for (int i = 0; i < _list.length; i++) {
+                    TabModel element = _list[i];
+                    String title = element.title;
+                    String clickTitle = _tabModel.title;
+                    if (title == clickTitle) {
+                      element.select = true;
+                      selectIndex = i;
+                    } else {
+                      element.select = false;
+                    }
+                  }
+                  double offset = _scrollController.offset;
+                  if (selectIndex <= 2) {
+                    _scrollController.animateTo(
+                      0.0,
+                      duration: Duration(milliseconds: 400),
+                      curve: Curves.linear,
+                    );
+                  } else if (selectIndex > 2 &&
+                      selectIndex < _list.length - 3) {
+                    if (selectIndex > _currentIndex) {
+                      //向左滑动
+                      _scrollController.animateTo(
+                        offset + 80.0 + (selectIndex - _currentIndex - 1) * 80,
+                        duration: Duration(milliseconds: 400),
+                        curve: Curves.linear,
+                      );
+                    } else {
+                      //向右滑动
+                      _scrollController.animateTo(
+                        offset - 60,
+                        duration: Duration(milliseconds: 400),
+                        curve: Curves.linear,
+                      );
+                    }
+                  } else {
+                    double max = _scrollController.position.maxScrollExtent;
+                    _scrollController.animateTo(
+                      max,
+                      duration: Duration(milliseconds: 400),
+                      curve: Curves.linear,
+                    );
+                  }
+                  _currentIndex = selectIndex;
+
+                  setState(() {});
+                  if (widget.onTap != null) {
+                    widget.onTap(_currentIndex);
+                  }
+                },
+                child: Container(
+                  padding:
+                      EdgeInsets.only(left: 12, right: 12, top: 2, bottom: 2),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    //背景
+                    color: bgColor,
+                    //边框
+                    border: Border.all(color: borderColor),
+                  ),
+                  child: Text(
+                    "${_tabModel.title}",
+                    style: TextStyle(color: textColor),
+                  ),
+                ),
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class TabModel {
+  String title;
+  int id;
+
+  //true 为选中
+  bool select;
+
+  TabModel({required this.id, required this.title, this.select = false});
+}
+
+class MapScreen extends StatefulWidget {
+  const MapScreen({Key? key}) : super(key: key);
+
+  @override
+  State<MapScreen> createState() => _MapScreenState();
+}
+
+class _MapScreenState extends State<MapScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Container();
   }
 }
