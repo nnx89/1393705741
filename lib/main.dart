@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables, prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:whoshere/widgets/chat_view.dart';
 import './widgets/MapView.dart';
 import './mock/mockMapOverLays.dart';
 import 'package:whoshere/mock/mockTagList.dart';
